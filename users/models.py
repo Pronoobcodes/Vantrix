@@ -34,8 +34,10 @@ class CustomUser(AbstractUser, PermissionsMixin):
     username = models.CharField(max_length=20, unique=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    '''
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
+    '''
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
 
@@ -52,6 +54,7 @@ class CustomUser(AbstractUser, PermissionsMixin):
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True)
+    '''
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
     location = models.CharField(max_length=100, blank=True)
     state = models.CharField(max_length=100, blank=True)
@@ -60,13 +63,14 @@ class Profile(models.Model):
     karma_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
     total_sales = models.PositiveIntegerField(default=0)
     total_purchases = models.PositiveIntegerField(default=0)
+    '''
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.email}'s Profile"
 
-    
+'''
 class UserVerification(models.Model):
     VERIFICATION_TYPES = [
         ('email', 'Email'),
@@ -81,3 +85,4 @@ class UserVerification(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.verification_type}"
+'''
