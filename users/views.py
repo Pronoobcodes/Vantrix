@@ -1,50 +1,49 @@
 from rest_framework.views import APIView
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, RetrieveAPIView 
+from rest_framework.generics import CreateAPIView, GenericAPIView,RetrieveUpdateAPIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from .serializers import (
     CustomUserSerializer, UserRegistrationSerializer, UserLoginSerializer, ProfileSerializer
 )
-from .models import CustomUser, Profile
+from .models import Profile
 
 
-class UserRegistrationView(APIView):
+class UserRegistrationView(CreateAPIView):
+    serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny]
-
-    def post(self, request):
-        serializer = UserRegistrationSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({
-                'user': CustomUserSerializer(user).data
-            }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class UserLoginView(APIView):
+class UserLoginView(GenericAPIView):
+    serializer_class = UserLoginSerializer
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = UserLoginSerializer(data=request.data)
+        serializer = self.get_serializer(data=request.data)
+
         if serializer.is_valid():
             user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+
             return Response({
-                'user': CustomUserSerializer(user).data
-            }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                'user': CustomUserSerializer(user).data,
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            })
+
+        return Response(serializer.errors, status=400)
     
 
 class UserLogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        request.auth.delete()  
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserProfileView(RetrieveUpdateDestroyAPIView):
+class UserProfileView(RetrieveUpdateAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = [IsAuthenticated]

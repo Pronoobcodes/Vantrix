@@ -1,12 +1,40 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
-from .models import CustomUser, Profile
+from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth.password_validation import validate_password
+from .models import Profile
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+User = get_user_model()
+
+
+class UserAccountSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False)
+    email = serializers.EmailField(required=False)
+    username = serializers.CharField(required=False)
+
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'password']
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if password:
+            instance.set_password(password)
+
+        instance.save()
+        return instance    
+
+
+class ProfileSerializer(serializers.ModelSerializer): 
+    user = UserAccountSerializer(read_only=True)
+
     class Meta:
         model = Profile
-        fields = ['bio', 'created_at', 'updated_at']
+        fields = ['user','bio', 'created_at', 'updated_at']
         read_only_fields = ['created_at', 'updated_at']
 
 
@@ -14,7 +42,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     profile = ProfileSerializer(read_only=True)
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = [
             'id', 'email', 'username',
             'phone_number', 'is_active',
@@ -24,25 +52,28 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=6)
+    password = serializers.CharField(write_only=True, validators=[validate_password])
 
     class Meta:
-        model = CustomUser
-        fields = ['email', 'username', 'password']
+        model = User
+        fields = ['id', 'email', 'username', 'password']
 
     def validate_email(self, value):
-        if CustomUser.objects.filter(email=value).exists():
+        if User.objects.filter(email=value).exists():
             raise serializers.ValidationError("Email already exists")
-        return value
+        return value.lower()
 
     def validate_username(self, value):
-        if CustomUser.objects.filter(username=value).exists():
+        if User.objects.filter(username=value).exists():
             raise serializers.ValidationError("Username already exists")
         return value
 
     def create(self, validated_data):
-        user = CustomUser.objects.create_user(**validated_data)
-        Profile.objects.create(user=user)  
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            password=validated_data['password']
+        )
         return user
 
 
@@ -52,7 +83,7 @@ class UserLoginSerializer(serializers.Serializer):
 
     def validate(self, data):
         user = authenticate(
-            email=data.get('email'),
+            username=data.get('email'),
             password=data.get('password')
         )
 
@@ -64,3 +95,5 @@ class UserLoginSerializer(serializers.Serializer):
 
         data['user'] = user
         return data
+    
+
