@@ -16,7 +16,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Item
-        fields = ['id', 'name', 'description', 'price', 'image', 'category', 'owner', 'stock', 'created_at']
+        fields = ['id', 'name', 'description', 'price', 'image', 'category', 'owner', 'stock','is_available', 'created_at']
         read_only_fields = ['id', 'owner', 'created_at']
 
     def validate_price(self, value):

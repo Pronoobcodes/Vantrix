@@ -28,6 +28,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('vantrix/users/', include('users.urls')),
+    path('vantrix/', include('items.urls')),
+
     path('silk/', include('silk.urls', namespace='silk')),
     path('vantrix/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('vantrix/schema/', SpectacularAPIView.as_view(), name='schema'), 

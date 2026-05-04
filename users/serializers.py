@@ -30,7 +30,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer): 
-    user = UserAccountSerializer(read_only=True)
+    user = UserAccountSerializer()
 
     class Meta:
         model = Profile
