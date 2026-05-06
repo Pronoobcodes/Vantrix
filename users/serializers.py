@@ -8,34 +8,51 @@ User = get_user_model()
 
 
 class UserAccountSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, required=False)
     email = serializers.EmailField(required=False)
     username = serializers.CharField(required=False)
-
+        
     class Meta:
         model = User
-        fields = ['email', 'username', 'password']
+        fields = ['email', 'username'] 
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField()
+    new_password = serializers.CharField(min_length=6)
+    confirm_password = serializers.CharField(min_length=6)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("Passwords do not match")
+        return data
+
+
+class ProfileSerializer(serializers.ModelSerializer): 
+    user = UserAccountSerializer(required=False)
+
+    class Meta:
+        model = Profile
+        fields = ['user','bio', 'profile_picture', 'location', 'total_sales', 'total_purchases', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'total_sales', 'total_purchases'  ]
 
     def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
+        user_data = validated_data.pop('user', None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        if password:
-            instance.set_password(password)
-
         instance.save()
+
+        if user_data:
+            user_serializer = UserAccountSerializer(
+                instance=instance.user,
+                data=user_data,
+                partial=True
+            )
+            user_serializer.is_valid(raise_exception=True)
+            user_serializer.save()
+
         return instance    
-
-
-class ProfileSerializer(serializers.ModelSerializer): 
-    user = UserAccountSerializer()
-
-    class Meta:
-        model = Profile
-        fields = ['user','bio', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at']
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

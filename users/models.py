@@ -54,16 +54,18 @@ class CustomUser(AbstractUser, PermissionsMixin):
 class Profile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True)
-    '''
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    
     location = models.CharField(max_length=100, blank=True)
+    '''
     state = models.CharField(max_length=100, blank=True)
     instagram_handle = models.CharField(max_length=100, blank=True)
     twitter_handle = models.CharField(max_length=100, blank=True)
     karma_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    '''
     total_sales = models.PositiveIntegerField(default=0)
     total_purchases = models.PositiveIntegerField(default=0)
-    '''
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

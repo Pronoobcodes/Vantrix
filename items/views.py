@@ -6,7 +6,6 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-
 from .models import Item, Category
 from .serializers import ItemSerializer, CategorySerializer
 from .filters import ItemFilter
