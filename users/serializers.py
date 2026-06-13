@@ -29,11 +29,12 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer): 
     user = UserAccountSerializer(required=False)
+    profile_picture = serializers.ImageField(allow_empty_file=False, required=False)
 
     class Meta:
         model = Profile
         fields = ['user','bio', 'profile_picture', 'location', 'total_sales', 'total_purchases', 'created_at', 'updated_at']
-        read_only_fields = ['created_at', 'updated_at', 'total_sales', 'total_purchases'  ]
+        read_only_fields = ['created_at', 'updated_at', 'total_sales', 'total_purchases']
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
@@ -52,7 +53,15 @@ class ProfileSerializer(serializers.ModelSerializer):
             user_serializer.is_valid(raise_exception=True)
             user_serializer.save()
 
-        return instance    
+        return instance
+
+    def validate_profile_picture(self, value):
+        if value:
+            if value.size > 2 * 1024 * 1024:  # 2MB limit
+                raise serializers.ValidationError("Profile picture size must be less than 2MB")
+            if not value.content_type.startswith('image/'):
+                raise serializers.ValidationError("Only image files are allowed")
+        return value    
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -97,6 +106,19 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        from django.contrib.auth import authenticate
+        email = data.get('email')
+        password = data.get('password')
+        
+        user = authenticate(username=email, password=password)
+        
+        if not user:
+            raise serializers.ValidationError("Invalid email or password")
+        
+        data['user'] = user
+        return data
 
     def validate(self, data):
         user = authenticate(

@@ -5,6 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter 
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from .models import Item, Category
 from .serializers import ItemSerializer, CategorySerializer
@@ -24,6 +25,7 @@ class ItemViewSet(ModelViewSet):
     filterset_class = ItemFilter
     search_fields = ['name', 'description']
     ordering_fields = ['price', 'created_at']
+    parser_classes = (MultiPartParser, FormParser)
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
