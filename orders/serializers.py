@@ -1,8 +1,12 @@
-from rest_framework import serializers
 from decimal import Decimal
+
+from django.contrib.auth import get_user_model
+from rest_framework import serializers
 
 from .models import Order, OrderItem, Escrow
 from items.models import Item
+
+User = get_user_model()
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -57,6 +61,13 @@ class CheckoutSerializer(serializers.Serializer):
     seller_id = serializers.UUIDField()
     shipping_address = serializers.JSONField()
     items = CheckoutItemSerializer(many=True)
+
+    def validate_seller_id(self, value):
+        try:
+            User.objects.get(id=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Seller does not exist")
+        return value
 
     def create(self, validated_data):
         buyer = self.context['request'].user
