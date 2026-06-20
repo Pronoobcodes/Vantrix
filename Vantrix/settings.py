@@ -10,11 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Simple environment helper for secret keys and configurable settings.
+# In production, replace this with a stronger env loader if needed.
+def env(key, default=None):
+    return os.environ.get(key, default)
 
 
 # Quick-start development settings - unsuitable for production
@@ -162,4 +168,5 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
 }
 
-
+PAYSTACK_SECRET_KEY = env("PAYSTACK_SECRET_KEY")
+PAYSTACK_PUBLIC_KEY = env("PAYSTACK_PUBLIC_KEY")
