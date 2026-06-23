@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'orders',
     'payments',
     'messages',
+    'reviews',
 
     'rest_framework',
     'rest_framework.authtoken',

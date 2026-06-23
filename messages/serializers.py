@@ -2,7 +2,9 @@ from rest_framework import serializers
 
 from .models import Message, Convversation
 from items.models import Item
-from users.models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -40,10 +42,10 @@ class CreateConversationSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = self.context['request'].user
-        recipient_id = User.objects.get(id=validated_data['recipient_id'])
+        recipient = User.objects.get(id=validated_data['recipient_id'])
 
         conversation = Convversation.objects.create()
-        conversation.participants.add(user, recipient_id)
+        conversation.participants.add(user, recipient)
 
         if validated_data.get('item_id'):
             item = Item.objects.get(id=validated_data['item_id'])

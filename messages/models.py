@@ -4,7 +4,7 @@ from django.conf import settings
 
 class Convversation(models.Model):
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='conversations')
-    items = models.ManyToManyField('items.Item', on_delete=models.CASCADE, null=True, blank=True, related_name='conversations')
+    items = models.ManyToManyField('items.Item', blank=True, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
