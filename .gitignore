@@ -61,3 +61,5 @@ htmlcov/
 
 # OS
 *.tmp
+# Firebase credentials
+notifications/firebase-service-account.json

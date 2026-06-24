@@ -1,5 +1,5 @@
 import django_filters.rest_framework
-from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter 
@@ -10,11 +10,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Item, Category
 from .serializers import ItemSerializer, CategorySerializer
 from .filters import ItemFilter
-
-
-class IsOwnerOrAdmin(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return obj.owner == request.user or request.user.is_staff
+from core.permissions import IsOwnerOrAdmin
 
 
 class ItemViewSet(ModelViewSet):

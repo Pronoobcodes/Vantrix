@@ -33,6 +33,7 @@ urlpatterns = [
     path('vantrix/payments/', include('payments.urls')),
     path('vantrix/messages/', include('messages.urls')),
     path('vantrix/reviews/', include('reviews.urls')),
+    path('vantrix/notifications/', include('notifications.urls')),
     
     path('silk/', include('silk.urls', namespace='silk')),
     path('vantrix/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

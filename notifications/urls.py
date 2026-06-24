@@ -1,22 +1,9 @@
-from django.urls import path
+﻿from rest_framework.routers import DefaultRouter
 
-from .views import (
-	NotificationListView,
-	NotificationDetailView,
-	NotificationCountView,
-	MarkNotificationAsReadView,
-	MarkAllNotificationsAsReadView,
-	RegisterDeviceTokenView,
-	DeleteDeviceTokenView,
-)
+from .views import DeviceTokenViewSet, NotificationViewSet
 
-urlpatterns = [
-	path("", NotificationListView.as_view(), name="notifications"),
-	path("<int:pk>/", NotificationDetailView.as_view(), name="notification-detail"),
-	path("<int:pk>/read/", MarkNotificationAsReadView.as_view(), name="notification-read"),
-	path("read-all/", MarkAllNotificationsAsReadView.as_view(), name="notification-read-all"),
-	path("count/", NotificationCountView.as_view(), name="notification-count"),
-	path("device/register/", RegisterDeviceTokenView.as_view(), name="device-register"),
-	path("device/deactivate/", DeleteDeviceTokenView.as_view(), name="device-deactivate"),
-]
+router = DefaultRouter()
+router.register('notifications', NotificationViewSet, basename='notifications')
+router.register('device-tokens', DeviceTokenViewSet, basename='device-tokens')
 
+urlpatterns = router.urls
